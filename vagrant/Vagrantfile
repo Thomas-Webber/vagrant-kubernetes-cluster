@@ -1,0 +1,32 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'yaml'
+
+servers = YAML.load_file('servers.yml')
+
+Vagrant.configure("2") do |config|
+
+  servers.each do |server|
+    # config.ssh.forward_agent = true
+    config.vm.define server["name"] do |srv|
+      srv.vm.box = server["box"]
+      srv.vm.hostname = server["name"]
+      srv.vm.network "private_network", ip: server["ip"]
+
+      srv.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--groups", "/k8s-cluster"]
+        vb.name = server["name"]
+        vb.memory = server["ram"]
+        vb.cpus = server["cpus"]
+      end
+    end
+  end
+  config.vm.provision "shell" do |s|
+    ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
+    s.inline = <<-SHELL
+      echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
+      echo #{ssh_pub_key} >> /root/.ssh/authorized_keys
+    SHELL
+  end
+end
