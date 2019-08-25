@@ -1,18 +1,22 @@
 # Vagrant Kubernetes Cluster
-Local multi-nodes kubernetes cluster local setup using vagrant, ansible, kubeadm for local experiments
+Multi-nodes kubernetes cluster using vagrant, ansible and kubeadm for local experiments
 
-## Requirements
+## Prerequisites
+- at least a 4 cores CPU and 8GB RAM on your computer
 - vagrant
 - virtualbox
 - make
 - ansible
+- a public/private rsa key pair called id_rsa in ~/.ssh/ (generate one with ssh-keygen)
 
-## Install cluster
+## Install
 `make install`
+The cluster servers are defined in vagrant/servers.yml \
+The kubernetes installation processe uses ansible. For more details check the ansible/ directory
 
-## Delete cluster
+## Clean
 `make clean`
 
-## Use cluster
-`make ssh` to connect to the master node
+## Use the cluster
+`make ssh` to connect to the master node \
 `kubectl get pods -A` list all pods

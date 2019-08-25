@@ -1,16 +1,18 @@
 ---
-- name: k8s-master-01
-  ip: 192.168.10.121
+- name: master-01
+  ip: 192.168.10.100
   box: ubuntu/bionic64
   cpus: 2
   ram: 2048
-- name: k8s-node-01
-  ip: 192.168.10.122
+
+- name: node-01
+  ip: 192.168.10.101
   box: ubuntu/bionic64
   cpus: 2
   ram: 2048
-- name: k8s-node-02
-  ip: 192.168.10.123
+
+- name: node-02
+  ip: 192.168.10.102
   box: ubuntu/bionic64
   cpus: 2
   ram: 2048
