@@ -6,3 +6,6 @@ build:
 
 push:
 	docker push $(NAME):$(TAG)
+
+run:
+	docker run -it -p 8080:8080 $(NAME):$(TAG)

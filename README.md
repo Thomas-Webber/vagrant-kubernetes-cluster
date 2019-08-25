@@ -7,7 +7,7 @@ Multi-nodes kubernetes cluster using vagrant, ansible and kubeadm for local expe
 - virtualbox
 - make
 - ansible
-- a public/private rsa key pair called id_rsa in ~/.ssh/ (generate one with ssh-keygen)
+- kubectl
 
 ## Install
 `make install`
@@ -18,5 +18,5 @@ The kubernetes installation processe uses ansible. For more details check the an
 `make clean`
 
 ## Use the cluster
-`make ssh` to connect to the master node \
+`kubectl` use the local cluster \
 `kubectl get pods -A` list all pods
