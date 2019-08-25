@@ -1,3 +1,2 @@
 - src: geerlingguy.docker
-- src: anmoel.kubernetes
-- src: evrardjp.keepalived
+- src: geerlingguy.kubernetes

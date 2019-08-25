@@ -1,26 +1,16 @@
 ---
-- name: etcd-01
-  box: ubuntu/bionic64
-  cpus: 1
-  ram: 1024
-  ip: 192.168.10.110
-- name: etcd-02
-  box: ubuntu/bionic64
-  cpus: 1
-  ram: 1024
-  ip: 192.168.10.111
 - name: k8s-master-01
-  box: ubuntu/bionic64
-  cpus: 2
-  ram: 2048
   ip: 192.168.10.121
-- name: k8s-worker-01
   box: ubuntu/bionic64
   cpus: 2
   ram: 2048
+- name: k8s-node-01
   ip: 192.168.10.122
-- name: k8s-worker-02
   box: ubuntu/bionic64
   cpus: 2
   ram: 2048
+- name: k8s-node-02
   ip: 192.168.10.123
+  box: ubuntu/bionic64
+  cpus: 2
+  ram: 2048

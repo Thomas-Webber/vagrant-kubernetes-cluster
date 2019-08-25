@@ -1,17 +1,9 @@
 ---
 
-- hosts: kubernetes
-  become: true
-  become_user: root
-  gather_facts: false
-  tasks:
-  - name: install python 2
-    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
-    changed_when: false
+- hosts: all
+  vars:
+    kubernetes_allow_pods_on_master: true
 
-- hosts: kubernetes
-  become: true
-  become_user: root
   roles:
     - geerlingguy.docker
-    - anmoel.kubernetes
+    - geerlingguy.kubernetes

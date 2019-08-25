@@ -12,3 +12,7 @@ Local multi-nodes kubernetes cluster local setup using vagrant, ansible, kubeadm
 
 ## Delete cluster
 `make clean`
+
+## Use cluster
+`make ssh` to connect to the master node
+`kubectl get pods -A` list all pods
