@@ -3,9 +3,9 @@ export ANSIBLE_BECOME=yes
 
 install:				## Provision and configure a cluster
 	cd vagrant && vagrant up
-	ansible-galaxy install -r ansible/requirements.yml
-	ansible-playbook -v -i ansible/hosts ansible/site.yml
-	./kubernetes/config.sh
+# 	ansible-galaxy install -r ansible/requirements.yml
+# 	ansible-playbook -v -i ansible/hosts ansible/site.yml
+# 	./kubernetes/config.sh
 
 clean:					## Delete the cluster
 	cd vagrant && vagrant destroy -f

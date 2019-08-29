@@ -1,0 +1,25 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'yaml'
+
+servers = YAML.load_file('servers.yml')
+
+Vagrant.configure("2") do |config|
+
+  servers.each do |server|
+    # config.ssh.forward_agent = true
+
+    config.vm.define server["name"] do |srv|
+      srv.vm.box = server["box"]
+      srv.vm.hostname = server["name"]
+      srv.vm.network "private_network", ip: server["ip"]
+
+      srv.vm.provider :virtualbox do |vb|
+        vb.name = server["name"]
+        vb.memory = server["ram"]
+        vb.cpus = server["cpus"]
+      end
+    end
+  end
+end
