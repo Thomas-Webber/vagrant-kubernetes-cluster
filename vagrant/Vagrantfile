@@ -1,93 +1,101 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-OS = 'ubuntu/bionic64'
 SERVERS = [
   {
-    name: 'master-1',
-    ip: '192.168.5.11',
-    type: 'master',
+    name: "master-1",
+    ip: "192.168.5.11",
+    type: "master",
     cpus: 2,
     memory: 2048,
-    forward_port: 2711
   },
   {
     name: "worker-1",
-    ip: '192.168.5.12',
-    type: 'node',
-    cpus: 1,
+    ip: "192.168.5.12",
+    type: "worker",
+    cpus: 2,
     memory: 2048,
-    forward_port: 2712
   },
   # {
-  #   name: 'worker-2',
-  #   ip: '192.168.5.13',
-  #   type: 'node',
+  #   name: "worker-2",
+  #   ip: "192.168.5.13",
+  #   type: "node",
   #   cpus: 1,
   #   memory: 2048,
-  #   forward_port: 2713
-  # },
-  # {
-  #   name: 'lb',
-  #   ip: '192.168.5.30',
-  #   type: 'load-balancer',
-  #   cpus: 1,
-  #   memory: 1028,
-  #   forward_port: 2730
-  # },
+  # }
 ]
 
-$HOST_CONFIG = <<-SCRIPT
-ADDRESS="$(ip -4 addr show enp0s8 | grep "inet" | head -1 |awk '{print $2}' | cut -d/ -f1)"
-sed -e "s/^.*${HOSTNAME}.*/${ADDRESS} ${HOSTNAME} ${HOSTNAME}.local/" -i /etc/hosts
-
-cat >> /etc/hosts <<EOF
-192.168.5.11  master-1
-192.168.5.12  worker-1
-192.168.5.13  worker-2
-192.168.5.30  lb
-EOF
-SCRIPT
-
 $CONFIGURE_BOX = <<-SCRIPT
-## DOCKER
+## Docker 18.06
 apt-get update && apt-get install -y apt-transport-https ca-certificates curl software-properties-common
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
 apt-get update && apt-get install -y docker-ce=$(apt-cache madison docker-ce | grep 18.06 | head -1 | awk '{print $3}')
+usermod -aG docker vagrant
 
-## DNS
-sed -i -e 's/#DNS=/DNS=8.8.8.8/' /etc/systemd/resolved.conf
-service systemd-resolved restart
+# ## DNS
+# sed -i -e 's/#DNS=/DNS=8.8.8.8/' /etc/systemd/resolved.conf
+# service systemd-resolved restart
+#
+# ## Bridge nf traffic
+# modprobe br_netfilter
 
-## Bridge nf traffic
-modprobe br_netfilter
+## Kubeadm
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+deb https://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+apt-get update
+apt-get install -y kubelet kubeadm kubectl
+apt-mark hold kubelet kubeadm kubectl
+swapoff -a
+sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+if [[ $HOSTNAME = master* ]]; then
+  echo "Configure the master node"
+  IP=$(ip -4 addr show enp0s8 | grep "inet" | head -1 |awk '{print $2}' | cut -d/ -f1)
+  kubeadm init --apiserver-advertise-address=$IP --apiserver-cert-extra-sans=$IP --node-name $HOSTNAME --pod-network-cidr=192.168.0.0/16
+  kubeadm token create --print-join-command >> /etc/kubeadm_join_cmd.sh
+  chmod +x /etc/kubeadm_join_cmd.sh
+
+  # Enable kubectl for vagrant user
+  sudo --user=vagrant mkdir -p /home/vagrant/.kube
+  sudo cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+  sudo chown $(id -u vagrant):$(id -g vagrant) /home/vagrant/.kube/config
+  echo 'alias k="kubectl"' >> /home/vagrant/.bashrc
+
+  # Install calico pod network add-on
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+  kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+
+  # Enable ssh access to master without password to get the join command
+  sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config
+  service sshd restart
+else
+  echo "Installing sshpass for the worker nodes"
+  apt-get install -y sshpass
+  sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.5.11:/etc/kubeadm_join_cmd.sh .
+  sh ./kubeadm_join_cmd.sh
+fi
 SCRIPT
 
 Vagrant.configure("2") do |config|
-  config.vm.box = OS
+  config.vm.box = "ubuntu/bionic64"
   config.vm.box_check_update = false
 
   SERVERS.each do |server|
     config.vm.define server[:name] do |node|
-      # Name shown in the GUI
+      node.vm.hostname = server[:name]
+      node.vm.network :private_network, ip: server[:ip]
+
       node.vm.provider "virtualbox" do |vb|
           vb.name = server[:name]
+          vb.customize ["modifyvm", :id, "--groups", "/k8s-cluster"]
           vb.memory = server[:memory]
           vb.cpus = server[:cpus]
       end
-      node.vm.hostname = server[:name]
-      node.vm.network :private_network, ip: server[:ip]
-      node.vm.network "forwarded_port", guest: 22, host: "#{server[:forward_port]}"
 
-      config.vm.provision "shell", inline: $HOST_CONFIG
       config.vm.provision "shell", inline: $CONFIGURE_BOX
-
-      # if opts[:type] == "master"
-      #     config.vm.provision "shell", inline: $configureMaster
-      # else
-      #     config.vm.provision "shell", inline: $configureNode
-      # end
     end
   end
 end
