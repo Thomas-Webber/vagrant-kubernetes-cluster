@@ -3,8 +3,8 @@ Multi-nodes kubernetes cluster using vagrant and kubeadm for local experiments
 
 ## Prerequisites
 - at least a 4 cores CPU and 8 GB RAM and 40 GB free disk space
-- vagrant
-- virtualbox
+- vagrant 2.2.5+
+- virtualbox 6.0.10+
 - make
 
 ## Install
