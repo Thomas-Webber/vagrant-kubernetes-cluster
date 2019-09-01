@@ -2,7 +2,7 @@
 Multi-nodes kubernetes cluster using vagrant and kubeadm for local experiments
 
 ## Prerequisites
-- at least a 4 cores CPU and 8 GB RAM and 40GB free disk space
+- at least a 4 cores CPU and 8 GB RAM and 30GB free disk space
 - vagrant
 - virtualbox
 - make
@@ -18,5 +18,7 @@ The kubernetes installation processe uses ansible. For more details check the an
 `make clean`
 
 ## Use the cluster
-`cd vagrant && vagrant ssh master-1`
-`kubectl get pods -A`
+1. `make ssh` Connect to the master node
+2. Run `git clone https://github.com/Thomas-Webber/vagrant-kubernetes-cluster.git && cd vagrant-kubernetes-cluster`
+3. `make install-helm` Install helm
+4. `make install-prometheus` Install prometheus and grafana for monitoring
