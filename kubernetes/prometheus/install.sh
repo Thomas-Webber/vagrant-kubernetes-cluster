@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Create a new namespace
 kubectl apply -f namespace.yml
 

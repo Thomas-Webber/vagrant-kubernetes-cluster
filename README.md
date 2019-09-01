@@ -8,16 +8,17 @@ Multi-nodes kubernetes cluster using vagrant and kubeadm for local experiments
 - make
 
 ## Install
-`make install` to provision the VMs and setup the cluster (see vagra)
+`make install` Provision the VMs and setup the cluster (see vagra)
 
 ## Clean
-`make clean`
+`make clean` Delete all nodes
 
 ## Use the cluster
 1. `make ssh` Connect to the master node
 2. Run `git clone https://github.com/Thomas-Webber/vagrant-kubernetes-cluster.git && cd vagrant-kubernetes-cluster`
+to get the sources in the master node
 3. `make install-helm` Install helm
 4. `make install-prometheus` Install prometheus and grafana for monitoring
 
 ## Notes
-Tested on OSX and ubuntu bionic desktop
+Tested on OSX and Ubuntu Bionic
