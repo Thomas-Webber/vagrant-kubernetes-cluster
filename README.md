@@ -8,7 +8,7 @@ Multi-nodes kubernetes cluster using vagrant and kubeadm for local experiments
 - make
 
 ## Install
-`make install` Provision the VMs and setup the cluster (see vagra)
+`make install` Provision the VMs and setup the cluster (see vagrant/Vagrantfile)
 
 ## Clean
 `make clean` Delete all nodes
